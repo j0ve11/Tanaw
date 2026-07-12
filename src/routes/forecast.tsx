@@ -50,9 +50,18 @@ function ForecastPage() {
   const [season, setSeason] = useState<"wet" | "dry">("wet");
   const [area, setArea] = useState<number>(25);
   const [result, setResult] = useState<null | { perHa: number; total: number; confidence: number }>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const compute = () => {
-    setResult(calculateForecast(region, season, area));
+  const compute = async () => {
+    setIsLoading(true);
+    try {
+      const prediction = await calculateForecast(region, season, area);
+      setResult(prediction);
+    } catch (error) {
+      console.error("Forecast failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

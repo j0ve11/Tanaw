@@ -1,0 +1,33 @@
+import joblib
+import xgboost as xgb
+import tensorflow as tf
+import numpy as np
+
+# 1. Load the bundle when the server starts
+f_scaler = joblib.load('feature_scaler.pkl')
+t_scaler = joblib.load('target_scaler.pkl')
+l1_model = xgb.Booster()
+l1_model.load_model('layer1_xgboost.json')
+l2_model = tf.keras.models.load_model('layer2_bilstm.keras')
+
+def handle_request(raw_data):
+    # STEP 1: Scaling
+    # raw_data must be (5 dekads, 11 features)
+    scaled_data = f_scaler.transform(raw_data)
+    
+    # STEP 2: Layer 1 Feature Extraction
+    # Convert to DMatrix for XGBoost inference
+    dmat = xgb.DMatrix(scaled_data)
+    l1_output = l1_model.predict(dmat)
+    
+    # STEP 3: Reshape for Bi-LSTM 
+    # Needs shape (1 sample, 5 time_steps, 11 features)
+    bilstm_input = scaled_data.reshape(1, 5, 11)
+    
+    # STEP 4: Layer 2 Prediction
+    scaled_prediction = l2_model.predict(bilstm_input)
+    
+    # STEP 5: Inverse Scale to Metric Tons
+    real_mt = t_scaler.inverse_transform(scaled_prediction)
+    
+    return float(real_mt)

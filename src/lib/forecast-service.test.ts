@@ -25,55 +25,61 @@ describe("forecast-service", () => {
   });
 
   describe("calculateForecast", () => {
-    it("should calculate forecast for default area (25ha) correctly", () => {
-      const result = calculateForecast("Nueva Ecija", "wet", 25);
+    it("should calculate forecast for default area (25ha) correctly", async () => {
+      const result = await calculateForecast("Nueva Ecija", "wet", 25);
       expect(result.perHa).toBe(5.4);
       expect(result.total).toBe(135);
       expect(result.confidence).toBe(81); // 78 + 0 + min(8, 2.5) = 80.5 -> 80, but with area/10 = 2.5, min(8, 2.5) = 2.5 -> 80.5 rounds to 81
     });
 
-    it("should increase yield per ha for smaller areas than 25ha", () => {
-      const result = calculateForecast("Nueva Ecija", "wet", 10);
-      const defaultResult = calculateForecast("Nueva Ecija", "wet", 25);
+    it("should increase yield per ha for smaller areas than 25ha", async () => {
+      const result = await calculateForecast("Nueva Ecija", "wet", 10);
+      const defaultResult = await calculateForecast("Nueva Ecija", "wet", 25);
       expect(result.perHa).toBeGreaterThan(defaultResult.perHa);
     });
 
-    it("should decrease yield per ha for larger areas than 25ha", () => {
-      const result = calculateForecast("Nueva Ecija", "wet", 50);
-      const defaultResult = calculateForecast("Nueva Ecija", "wet", 25);
+    it("should decrease yield per ha for larger areas than 25ha", async () => {
+      const result = await calculateForecast("Nueva Ecija", "wet", 50);
+      const defaultResult = await calculateForecast("Nueva Ecija", "wet", 25);
       expect(result.perHa).toBeLessThan(defaultResult.perHa);
     });
 
-    it("should calculate dry season confidence higher than wet season", () => {
-      const wetResult = calculateForecast("Nueva Ecija", "wet", 25);
-      const dryResult = calculateForecast("Nueva Ecija", "dry", 25);
+    it("should calculate dry season confidence higher than wet season", async () => {
+      const wetResult = await calculateForecast("Nueva Ecija", "wet", 25);
+      const dryResult = await calculateForecast("Nueva Ecija", "dry", 25);
       // 78 + (dry ? 6 : 0) + min(8, area/10)
       expect(dryResult.confidence).toBe(wetResult.confidence + 6);
     });
 
-    it("should cap confidence at 78 + 6 + 8 = 92", () => {
-      const result = calculateForecast("Nueva Ecija", "dry", 1000);
+    it("should cap confidence at 78 + 6 + 8 = 92", async () => {
+      const result = await calculateForecast("Nueva Ecija", "dry", 1000);
       expect(result.confidence).toBe(92);
     });
 
-    it("should handle minimum area (1 ha)", () => {
-      const result = calculateForecast("Nueva Ecija", "wet", 1);
+    it("should handle minimum area (1 ha)", async () => {
+      const result = await calculateForecast("Nueva Ecija", "wet", 1);
       expect(result.perHa).toBeGreaterThan(0);
       expect(result.total).toBeGreaterThan(0);
       expect(result.confidence).toBeGreaterThan(0);
     });
 
-    it("should handle maximum area (2000 ha)", () => {
-      const result = calculateForecast("Nueva Ecija", "wet", 2000);
+    it("should handle maximum area (2000 ha)", async () => {
+      const result = await calculateForecast("Nueva Ecija", "wet", 2000);
       expect(result.perHa).toBeGreaterThan(0);
       expect(result.total).toBeGreaterThan(0);
       expect(result.confidence).toBeLessThanOrEqual(92);
     });
 
-    it("should return different values for different regions", () => {
-      const neResult = calculateForecast("Nueva Ecija", "wet", 25);
-      const ilResult = calculateForecast("Iloilo", "wet", 25);
+    it("should return different values for different regions", async () => {
+      const neResult = await calculateForecast("Nueva Ecija", "wet", 25);
+      const ilResult = await calculateForecast("Iloilo", "wet", 25);
       expect(neResult.perHa).not.toBe(ilResult.perHa);
+    });
+
+    it("should return fallback estimate when no dekad features provided", async () => {
+      const result = await calculateForecast("Nueva Ecija", "wet", 25);
+      expect(result.perHa).toBeGreaterThan(0);
+      expect(result.total).toBe(135); // 5.4 * 25
     });
   });
 
@@ -86,8 +92,8 @@ describe("forecast-service", () => {
       expect(getBaseYield("Nueva Ecija", "dry")).toBe(6.1);
     });
 
-    it("should throw for invalid region", () => {
-      expect(() => getBaseYield("Invalid Region", "wet")).toThrow();
+    it("should return 5.0 for invalid region", () => {
+      expect(getBaseYield("Invalid Region", "wet")).toBe(5.0);
     });
   });
 });

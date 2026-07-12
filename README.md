@@ -18,11 +18,13 @@ TANAW is a dashboard application that provides:
 - **Charts**: Recharts
 - **Icons**: Lucide React
 - **Build Tool**: Vite v8
+- **ML Backend**: FastAPI + XGBoost + TensorFlow (Bi-LSTM)
 
 ## Prerequisites
 
-- Node.js (v18 or higher)
-- npm (or Bun if available)
+- **Node.js** (v18 or higher)
+- **Python** (3.10 or higher) - Required for ML backend
+- **npm** (or Bun if available)
 
 ## Getting Started
 
@@ -73,15 +75,32 @@ src/
 │   ├── index.tsx     # Dashboard (home page)
 │   ├── forecast.tsx  # Forecast page
 │   ├── settings.tsx  # Settings page
-│   └── users.tsx     # Users page
+│   ├── users.tsx     # Users page
+│   └── api/
+│       └── forecast.ts      # API proxy to Python backend
 ├── components/       # Reusable UI components
 │   ├── app-shell.tsx # Main application shell
 │   └── ui/          # Radix UI-based components
 ├── hooks/           # Custom React hooks
 ├── lib/             # Utilities and helpers
+│   ├── forecast-service.ts  # Forecast calculation (XGBoost/BiLSTM integration)
+│   └── forecast-service.test.ts
 ├── router.tsx       # Router configuration
 ├── server.ts        # SSR server entry
 └── start.tsx        # Client entry point
+```
+
+```
+api/
+└── forecast_api.py  # FastAPI backend for ML predictions
+```
+
+```
+XGBoost Model/
+├── layer1_xgboost.json  # XGBoost feature extractor
+├── layer2_bilstm.keras  # Bi-LSTM yield predictor
+├── feature_scaler.pkl   # Feature normalization scaler
+└── target_scaler.pkl    # Target inverse scaling
 ```
 
 ## Features
@@ -93,9 +112,47 @@ src/
 - Quick access to field details
 
 ### Pages
-- **Forecast** - Detailed crop forecasting
+- **Forecast** - Detailed crop forecasting using XGBoost/Bi-LSTM ensemble model
 - **Users** - User management
 - **Settings** - Application settings
+
+## XGBoost Model Integration
+
+TANAW integrates a 2-layer ensemble ML model for satellite-based rice yield forecasting:
+
+**Model Architecture:**
+- **Layer 1**: XGBoost regressor (100 trees) - Feature extraction
+- **Layer 2**: Bi-LSTM neural network (TensorFlow/Keras) - Yield prediction
+- **Input**: 5 dekads × 11 satellite features
+- **Output**: Metric tons yield prediction
+
+**Satellite Features:**
+| Feature | Source |
+|---------|--------|
+| VH_Mean_dB, VV_Mean_dB | Sentinel-1 SAR backscatter |
+| NDVI_Mean, EVI_Mean, LSWI_Mean | Sentinel-2 optical indices |
+| RVI, VH-VV Ratio | Derived vegetation indices |
+| Seasonal_Encoding | Wet/Dry season binary |
+| Event_Disruption | Binary event indicator |
+| Sin_Dekad/Cos_Dekad | Cyclical temporal encoding |
+
+See [XGBOOST_INTEGRATION_GUIDE.md](./XGBOOST_INTEGRATION_GUIDE.md) for detailed integration documentation.
+
+### Running with ML Backend
+
+For full XGBoost model predictions, run both servers:
+
+```bash
+# Terminal 1: Start Python ML API (run from project root)
+pip install -r api/requirements.txt
+uvicorn api.forecast_api:app --reload --port 8000
+
+# Terminal 2: Start TanStack dev server (from project root)
+npm run dev
+```
+
+The frontend will be available at `http://localhost:8080/`.
+The Python API runs on `http://localhost:8000/`.
 
 ## Configuration
 
