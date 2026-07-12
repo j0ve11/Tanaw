@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sparkles, Wheat, TrendingUp, Droplets } from "lucide-react";
+import { toast } from "sonner";
 import {
   Bar,
   BarChart,
@@ -23,57 +24,72 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { REGIONS, calculateForecast } from "@/lib/forecast-service";
+import { REGION_TOTAL_YIELDS, REGION_AREAS, calculateForecast, getRegionNames } from "@/lib/forecast-service";
 
 export const Route = createFileRoute("/forecast")({
   head: () => ({
     meta: [
-      { title: "Forecast — Tanaw" },
-      { name: "description", content: "Generate rice yield forecasts by region, season, and planted area." },
+      { title: "Tanaw" },
+      { name: "description", content: "Generate rice yield forecasts by region and season. Uses satellite data from Google Earth Engine." },
       { property: "og:title", content: "Rice yield forecast — Tanaw" },
-      { property: "og:description", content: "Generate rice yield forecasts by region, season, and planted area." },
+      { property: "og:description", content: "Generate rice yield forecasts by region and season." },
     ],
   }),
   component: ForecastPage,
 });
 
+// Total of all region yields for historical chart
+const TOTAL_YIELDS = Object.values(REGION_TOTAL_YIELDS).reduce((sum, r) => sum + r.wet + r.dry, 0);
+
 const history = [
-  { season: "Dry 24", yield: 5.2 },
-  { season: "Wet 24", yield: 4.7 },
-  { season: "Dry 25", yield: 5.5 },
-  { season: "Wet 25", yield: 5.1 },
-  { season: "Dry 26", yield: 5.9 },
+  { season: "Dry 24", yield: Math.round(TOTAL_YIELDS * 0.15) },
+  { season: "Wet 24", yield: Math.round(TOTAL_YIELDS * 0.13) },
+  { season: "Dry 25", yield: Math.round(TOTAL_YIELDS * 0.18) },
+  { season: "Wet 25", yield: Math.round(TOTAL_YIELDS * 0.15) },
+  { season: "Dry 26", yield: Math.round(TOTAL_YIELDS * 0.19) },
 ];
 
 function ForecastPage() {
   const [region, setRegion] = useState<string>("Nueva Ecija");
   const [season, setSeason] = useState<"wet" | "dry">("wet");
-  const [area, setArea] = useState<number>(25);
-  const [result, setResult] = useState<null | { perHa: number; total: number; confidence: number }>(null);
+  const [result, setResult] = useState<null | { perHa: number; total: number; mape: number; source?: string }>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const compute = async () => {
     setIsLoading(true);
     try {
-      const prediction = await calculateForecast(region, season, area);
+      // Area is determined automatically from satellite data (Google Earth Engine)
+      const prediction = await calculateForecast(region, season);
       setResult(prediction);
+      // Show warning toast if using fallback/estimated data
+      if (prediction.source === "fallback") {
+        toast.warning("Forecast warning", {
+          description: "Using estimated values due to API unavailability. Results may be less accurate.",
+        });
+      }
     } catch (error) {
-      console.error("Forecast failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      console.error("Forecast failed:", errorMessage);
+      toast.error("Forecast error", {
+        description: `Unable to generate forecast: ${errorMessage}`,
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const areaForDisplay = result ? REGION_AREAS[region] ?? 13000 : 13000;
+
   return (
     <AppShell
       title="New forecast"
-      subtitle="Estimate yield from region, season, and planted area."
+      subtitle="Estimate yield using satellite data from Google Earth Engine."
     >
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="font-display text-xl">Inputs</CardTitle>
-            <CardDescription>Tune the parameters and generate a forecast.</CardDescription>
+            <CardDescription>Select region and season to generate a forecast.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-2">
@@ -81,7 +97,7 @@ function ForecastPage() {
               <Select value={region} onValueChange={setRegion}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {Object.keys(REGIONS).map((r) => (
+                  {getRegionNames().map((r) => (
                     <SelectItem key={r} value={r}>{r}</SelectItem>
                   ))}
                 </SelectContent>
@@ -113,10 +129,8 @@ function ForecastPage() {
               <Input
                 id="area"
                 type="number"
-                min={1}
-                max={2000}
-                value={area}
-                onChange={(e) => setArea(Number(e.target.value) || 0)}
+                value={areaForDisplay.toLocaleString()}
+                disabled
               />
             </div>
             <Button onClick={compute} className="w-full" size="lg">
@@ -136,33 +150,33 @@ function ForecastPage() {
                   <p className="text-sm uppercase tracking-wider opacity-80">Projected yield</p>
                   <p className="mt-1 font-display text-5xl font-semibold">
                     {result ? result.perHa : "—"}
-                    <span className="ml-1 text-lg font-normal opacity-80">t/ha</span>
+                    <span className="ml-1 text-lg font-normal opacity-80">MT/ha</span>
                   </p>
                   <p className="mt-2 text-sm opacity-90">
                     {result ? (
-                      <>Total: <span className="font-semibold">{result.total} t</span> across {area} ha</>
+                      <>Total: <span className="font-semibold">{result.total.toLocaleString()} MT</span> across {areaForDisplay.toLocaleString()} ha</>
                     ) : (
-                      <>Enter inputs and generate a forecast.</>
+                      <>Select region and season, then generate a forecast.</>
                     )}
                   </p>
                 </div>
                 <Badge className="bg-background/20 text-primary-foreground hover:bg-background/30 border-0 backdrop-blur">
                   <TrendingUp className="mr-1 h-3 w-3" />
-                  {result ? `${result.confidence}% confidence` : "Model ready"}
+                  {result ? `${result.mape}% MAPE` : "Model ready"}
                 </Badge>
               </div>
             </div>
             <CardContent className="grid gap-4 p-6 sm:grid-cols-3">
               <Stat label="Region" value={region} />
               <Stat label="Season" value={season === "wet" ? "Wet" : "Dry"} />
-              <Stat label="Area" value={`${area} ha`} />
+              <Stat label="Area" value={`${areaForDisplay.toLocaleString()} ha`} />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="font-display text-xl">Historical yield · {region}</CardTitle>
-              <CardDescription>Past 5 seasons (t/ha)</CardDescription>
+              <CardDescription>Past 5 seasons (MT)</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-56">
@@ -170,7 +184,7 @@ function ForecastPage() {
                   <BarChart data={history} margin={{ left: -10, right: 8, top: 6, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                     <XAxis dataKey="season" tickLine={false} axisLine={false} stroke="var(--color-muted-foreground)" fontSize={12} />
-                    <YAxis tickLine={false} axisLine={false} stroke="var(--color-muted-foreground)" fontSize={12} />
+                    <YAxis tickLine={false} axisLine={false} stroke="var(--color-muted-foreground)" fontSize={12} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                     <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12 }} />
                     <Bar dataKey="yield" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
                   </BarChart>

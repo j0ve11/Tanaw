@@ -15,6 +15,7 @@ export const ServerRoute = {
       
       if (!response.ok) {
         const error = await response.text()
+        console.error(`Forecast API error: ${response.status}`, error || 'Unknown error')
         return new Response(JSON.stringify({ error: error || 'Prediction failed' }), {
           status: response.status,
           headers: { 'Content-Type': 'application/json' }
@@ -26,6 +27,8 @@ export const ServerRoute = {
         headers: { 'Content-Type': 'application/json' }
       })
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.error('Forecast API error: Backend unavailable', errorMessage)
       return new Response(JSON.stringify({ error: 'Backend unavailable' }), {
         status: 503,
         headers: { 'Content-Type': 'application/json' }

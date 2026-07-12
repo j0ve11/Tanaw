@@ -5,13 +5,26 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MoreHorizontal, Plus, Search } from "lucide-react";
+import { MoreHorizontal, Plus, Search, Download, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/users")({
   head: () => ({
@@ -28,7 +41,16 @@ export const Route = createFileRoute("/users")({
 type Role = "Owner" | "Agronomist" | "Field lead" | "Viewer";
 type Status = "Active" | "Invited" | "Suspended";
 
-const users: { name: string; email: string; role: Role; fields: number; status: Status; joined: string }[] = [
+type User = {
+  name: string;
+  email: string;
+  role: Role;
+  fields: number;
+  status: Status;
+  joined: string;
+};
+
+const initialUsers: User[] = [
   { name: "Maya Reyes", email: "maya@tanaw.farm", role: "Owner", fields: 3, status: "Active", joined: "Jan 2024" },
   { name: "Ivan Cruz", email: "ivan@tanaw.farm", role: "Agronomist", fields: 6, status: "Active", joined: "Mar 2024" },
   { name: "Lea Ocampo", email: "lea@tanaw.farm", role: "Field lead", fields: 2, status: "Active", joined: "Aug 2024" },
@@ -47,13 +69,50 @@ function initials(name: string) {
 }
 
 function UsersPage() {
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [userToRemove, setUserToRemove] = useState<User | null>(null);
+
+  const handleExportUsers = () => {
+    const reportData = [
+      ["Users Report - Tanaw Workspace"],
+      [""],
+      ["Name", "Email", "Role", "Fields", "Status", "Joined"],
+      ...users.map((u) => [u.name, u.email, u.role, u.fields, u.status, u.joined]),
+    ];
+
+    const csvContent = reportData.map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `tanaw-users-report-${new Date().toISOString().split("T")[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success("Users exported successfully", {
+      description: `${users.length} users have been downloaded as CSV.`,
+    });
+  };
+
+  const handleRemoveUser = (user: User) => {
+    setUsers(users.filter((u) => u.email !== user.email));
+    setUserToRemove(null);
+    toast.success("User removed", {
+      description: `${user.name} has been removed from the workspace.`,
+    });
+  };
+
   return (
     <AppShell
       title="Users"
       subtitle="Manage teammates, agronomists, and access to your fields."
       actions={
         <>
-          <Button variant="outline">Export</Button>
+          <Button variant="outline" onClick={handleExportUsers}>
+            <Download className="mr-1.5 h-4 w-4" /> Export
+          </Button>
           <Button><Plus className="mr-1.5 h-4 w-4" /> Invite user</Button>
         </>
       }
@@ -116,7 +175,36 @@ function UsersPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>Edit role</DropdownMenuItem>
                         <DropdownMenuItem>Reset password</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Remove</DropdownMenuItem>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem 
+                              className="text-destructive focus:text-destructive"
+                              onSelect={(e) => {
+                                e.preventDefault();
+                                setUserToRemove(u);
+                              }}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" /> Remove user
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove {userToRemove?.name}?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will remove the user from your workspace. They will no longer be able to access any fields or forecasts. This action can be undone by inviting them again.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setUserToRemove(null)}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                className="bg-destructive text-destructive-foreground"
+                                onClick={() => userToRemove && handleRemoveUser(userToRemove)}
+                              >
+                                Remove user
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

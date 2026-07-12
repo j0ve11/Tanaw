@@ -14,6 +14,7 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     globals: true,
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    reporters: ["verbose"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "clover"],
