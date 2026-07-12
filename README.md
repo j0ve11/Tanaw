@@ -130,7 +130,7 @@ TANAW integrates a 2-layer ensemble ML model for satellite-based rice yield fore
 | Feature | Source |
 |---------|--------|
 | VH_Mean_dB, VV_Mean_dB | Sentinel-1 SAR backscatter |
-| NDVI_Mean, EVI_Mean, LSWI_Mean | Sentinel-2 optical indices |
+| NDVI_Mean, EVI_Mean, LSWI_Mean | MODIS optical indices |
 | RVI, VH-VV Ratio | Derived vegetation indices |
 | Seasonal_Encoding | Wet/Dry season binary |
 | Event_Disruption | Binary event indicator |
