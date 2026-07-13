@@ -69,25 +69,28 @@ const ACCURATE_MAPE: Record<Season, number> = {
 /**
  * Calculate forecast using the XGBoost ensemble model.
  * Uses Google Earth Engine satellite data for automatic region-based prediction.
- * No hectare input required - model predicts based on region.
+ * Area parameter allows custom planted area for total yield calculation.
  */
 export async function calculateForecast(
   region: string,
   season: Season,
-  area?: number,  // Optional - not required for model prediction
+  area?: number,  // Optional - user-specified area for total yield calculation
   dekads?: DekadFeatures[]
 ): Promise<ForecastResult> {
   // If no satellite data provided, use calibrated region-based estimation
   if (!dekads || dekads.length !== 5) {
     // Get total yield prediction for the region (directly in Metric Tons)
-    const totalYield = REGION_TOTAL_YIELDS[region]?.[season] ?? 70000;
+    const baseTotalYield = REGION_TOTAL_YIELDS[region]?.[season] ?? 70000;
     
     // Calculate per hectare yield using average area
     const avgArea = REGION_AREAS[region] ?? 25000;
     
-    // Apply calibration for more accurate predictions
-    const calibratedTotalYield = totalYield * CALIBRATION_FACTORS[season];
-    const perHa = +(calibratedTotalYield / avgArea).toFixed(2);
+    // Apply calibration for more accurate predictions (both per-ha and total)
+    const calibratedTotal = baseTotalYield * CALIBRATION_FACTORS[season];
+    const perHa = +(calibratedTotal / avgArea).toFixed(2);
+    
+    // Calculate total yield: use calibrated total if no custom area, otherwise use perHa * customArea
+    const totalYield = area && area > 0 ? +(perHa * area).toFixed(0) : calibratedTotal;
     
     // Use improved MAPE values reflecting calibrated model accuracy
     const mape = ACCURATE_MAPE[season];
@@ -115,13 +118,13 @@ export async function calculateForecast(
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Forecast API error:', errorMessage);
     // Fallback to calibrated region-based estimation on error
-    const totalYield = REGION_TOTAL_YIELDS[region]?.[season] ?? 70000;
+    const baseTotalYield = REGION_TOTAL_YIELDS[region]?.[season] ?? 70000;
     const avgArea = REGION_AREAS[region] ?? 25000;
-    const calibratedTotalYield = totalYield * CALIBRATION_FACTORS[season];
+    const calibratedTotalYield = baseTotalYield * CALIBRATION_FACTORS[season];
     const perHa = +(calibratedTotalYield / avgArea).toFixed(2);
     // Slightly higher MAPE for estimated prediction
     const mape = season === "dry" ? 7.2 : 6.8;
-    return { perHa, total: totalYield, mape, source: "fallback" };
+    return { perHa, total: calibratedTotalYield, mape, source: "fallback" };
   }
 }
 
@@ -158,16 +161,16 @@ export function generateSampleDekadFeatures(season: Season): DekadFeatures[] {
 
 // Get calibrated forecast with improved accuracy
 export function getCalibratedForecast(region: string, season: Season): ForecastResult {
-  const totalYield = REGION_TOTAL_YIELDS[region]?.[season] ?? 70000;
+  const baseTotalYield = REGION_TOTAL_YIELDS[region]?.[season] ?? 70000;
   const avgArea = REGION_AREAS[region] ?? 25000;
   
   // Apply calibration
-  const calibratedTotalYield = totalYield * CALIBRATION_FACTORS[season];
+  const calibratedTotalYield = baseTotalYield * CALIBRATION_FACTORS[season];
   const perHa = +(calibratedTotalYield / avgArea).toFixed(2);
   
   return {
     perHa,
-    total: totalYield,
+    total: calibratedTotalYield,
     mape: ACCURATE_MAPE[season]
   };
 }

@@ -38,8 +38,10 @@ export const Route = createFileRoute("/forecast")({
   component: ForecastPage,
 });
 
-// Total of all region yields for historical chart
-const TOTAL_YIELDS = Object.values(REGION_TOTAL_YIELDS).reduce((sum, r) => sum + r.wet + r.dry, 0);
+// Total baseline forecasted yield for historical chart
+const TOTAL_FORECASTED_YIELDS = Object.values(REGION_TOTAL_YIELDS).reduce((sum, r) => sum + r.wet + r.dry, 0);
+// Backward compatible alias
+const TOTAL_YIELDS = TOTAL_FORECASTED_YIELDS;
 
 const history = [
   { season: "Dry 24", yield: Math.round(TOTAL_YIELDS * 0.15) },
@@ -52,14 +54,19 @@ const history = [
 function ForecastPage() {
   const [region, setRegion] = useState<string>("Nueva Ecija");
   const [season, setSeason] = useState<"wet" | "dry">("wet");
+  const [area, setArea] = useState<number>(0);
   const [result, setResult] = useState<null | { perHa: number; total: number; mape: number; source?: string }>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Get default area for selected region (Metric Tons total yield)
+  const defaultArea = REGION_AREAS[region] ?? 13000;
+  const areaForCalculation = area > 0 ? area : defaultArea;
 
   const compute = async () => {
     setIsLoading(true);
     try {
-      // Area is determined automatically from satellite data (Google Earth Engine)
-      const prediction = await calculateForecast(region, season);
+      // Use user-specified area if provided, otherwise use default region area
+      const prediction = await calculateForecast(region, season, areaForCalculation);
       setResult(prediction);
       // Show warning toast if using fallback/estimated data
       if (prediction.source === "fallback") {
@@ -78,7 +85,8 @@ function ForecastPage() {
     }
   };
 
-  const areaForDisplay = result ? REGION_AREAS[region] ?? 13000 : 13000;
+  // Get area for display: use user input if provided, otherwise region default
+  const areaForDisplay = area > 0 ? area : (result ? REGION_AREAS[region] ?? 13000 : REGION_AREAS[region] ?? 13000);
 
   return (
     <AppShell
@@ -129,8 +137,9 @@ function ForecastPage() {
               <Input
                 id="area"
                 type="number"
-                value={areaForDisplay.toLocaleString()}
-                disabled
+                value={areaForDisplay}
+                onChange={(e) => setArea(Number(e.target.value) || 0)}
+                min={1}
               />
             </div>
             <Button onClick={compute} className="w-full" size="lg">
@@ -147,7 +156,7 @@ function ForecastPage() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm uppercase tracking-wider opacity-80">Projected yield</p>
+                  <p className="text-sm uppercase tracking-wider opacity-80">Forecasted yield</p>
                   <p className="mt-1 font-display text-5xl font-semibold">
                     {result ? result.perHa : "—"}
                     <span className="ml-1 text-lg font-normal opacity-80">MT/ha</span>

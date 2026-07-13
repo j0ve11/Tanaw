@@ -12,7 +12,16 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:dashboard": "vitest run --reporter=verbose src/routes/index.test.tsx",
+    "test:forecast": "vitest run --reporter=verbose src/routes/forecast.test.tsx",
+    "test:settings": "vitest run --reporter=verbose src/routes/settings.test.tsx",
+    "test:accessibility": "vitest run --reporter=verbose --grep='Accessibility'",
+    "test:mobile": "vitest run --reporter=verbose --grep='Mobile'",
+    "test:cross-browser": "vitest run --reporter=verbose --grep='Cross-Browser'",
+    "test:typography": "vitest run --reporter=verbose src/styles/typography.test.ts",
+    "test:all": "vitest run --coverage",
+    "test:api": "cd api && python -m pytest test_forecast_api.py -v"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -75,9 +84,6 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^22.16.5",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.32.0",

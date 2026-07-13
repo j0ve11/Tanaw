@@ -15,8 +15,10 @@ import {
 } from "recharts";
 import { REGION_TOTAL_YIELDS, REGION_AREAS } from "@/lib/forecast-service";
 
-// Total of all region yields = ~944,723 MT
-const TOTAL_PROJECTED_YIELD = Object.values(REGION_TOTAL_YIELDS).reduce((sum, r) => sum + r.wet + r.dry, 0);
+// Total baseline forecasted yield = ~944,723 MT
+const TOTAL_FORECASTED_YIELD = Object.values(REGION_TOTAL_YIELDS).reduce((sum, r) => sum + r.wet + r.dry, 0);
+// Backward compatible alias
+const TOTAL_PROJECTED_YIELD = TOTAL_FORECASTED_YIELD;
 
 // Total area across all regions = ~78,000 ha
 const TOTAL_AREA = Object.values(REGION_AREAS).reduce((sum, a) => sum + a, 0);
@@ -33,7 +35,7 @@ const yieldTrend = [
 ];
 
 const stats = [
-  { label: "Projected yield", value: `${TOTAL_PROJECTED_YIELD.toLocaleString()} MT`, delta: "+8.2%", icon: TrendingUp, tone: "success" as const },
+  { label: "Forecasted yield", value: `${TOTAL_PROJECTED_YIELD.toLocaleString()} MT`, delta: "+8.2%", icon: TrendingUp, tone: "success" as const },
   { label: "Active fields", value: "6", delta: `${TOTAL_AREA.toLocaleString()} ha total`, icon: Sprout, tone: "muted" as const },
   { label: "Rainfall (7d)", value: "218 mm", delta: "+12% vs avg", icon: Droplets, tone: "muted" as const },
   { label: "Growing degree days", value: "1,420", delta: "On track", icon: CloudSun, tone: "muted" as const },
@@ -41,12 +43,12 @@ const stats = [
 
 // Fields with realistic area derived from REGION_AREAS
 const fields = [
-  { name: "North Paddy A", region: "Nueva Ecija", season: "Wet", area: REGION_AREAS["Nueva Ecija"], progress: 68, yield: "6,130 kg/ha", status: "Reproductive" },
-  { name: "River Bend", region: "Iloilo", season: "Wet", area: REGION_AREAS["Iloilo"], progress: 42, yield: "5,560 kg/ha", status: "Vegetative" },
-  { name: "South Terrace", region: "Cagayan", season: "Dry", area: REGION_AREAS["Cagayan"], progress: 88, yield: "5,940 kg/ha", status: "Ripening" },
-  { name: "Central Plains", region: "Pangasinan", season: "Dry", area: REGION_AREAS["Pangasinan"], progress: 75, yield: "6,740 kg/ha", status: "Maturing" },
-  { name: "East Valley", region: "Bulacan", season: "Wet", area: REGION_AREAS["Bulacan"], progress: 52, yield: "5,760 kg/ha", status: "Tillering" },
-  { name: "Northwest Fields", region: "Isabela", season: "Dry", area: REGION_AREAS["Isabela"], progress: 91, yield: "7,000 kg/ha", status: "Harvest Ready" },
+  { name: "North Paddy A", region: "Nueva Ecija", season: "Wet", area: REGION_AREAS["Nueva Ecija"], progress: 68, yield: "6.13 MT/ha", status: "Reproductive" },
+  { name: "River Bend", region: "Iloilo", season: "Wet", area: REGION_AREAS["Iloilo"], progress: 42, yield: "5.56 MT/ha", status: "Vegetative" },
+  { name: "South Terrace", region: "Cagayan", season: "Dry", area: REGION_AREAS["Cagayan"], progress: 88, yield: "5.94 MT/ha", status: "Ripening" },
+  { name: "Central Plains", region: "Pangasinan", season: "Dry", area: REGION_AREAS["Pangasinan"], progress: 75, yield: "6.74 MT/ha", status: "Maturing" },
+  { name: "East Valley", region: "Bulacan", season: "Wet", area: REGION_AREAS["Bulacan"], progress: 52, yield: "5.76 MT/ha", status: "Tillering" },
+  { name: "Northwest Fields", region: "Isabela", season: "Dry", area: REGION_AREAS["Isabela"], progress: 91, yield: "7.0 MT/ha", status: "Harvest Ready" },
 ];
 
 export const Route = createFileRoute("/")({

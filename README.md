@@ -2,6 +2,41 @@
 
 A modern web application for monitoring and forecasting rice field productivity, built with TanStack Start, React, and Tailwind CSS.
 
+## System Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         TANAW Architecture                       │
+└─────────────────────────────────────────────────────────────────┘
+
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│    Frontend      │     │    Backend API   │     │  ML Model Layer  │
+│  (TanStack Start)│◄───►│   (FastAPI)      │◄───►│  (XGBoost/BiLSTM)│
+└──────────────────┘     └──────────────────┘     └──────────────────┘
+        │                         │                         │
+        ▼                         ▼                         ▼
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  React 19 + TS   │     │  FastAPI v1.0    │     │  TensorFlow/Keras │
+│  Tailwind CSS v4 │     │  Uvicorn Server  │     │  XGBoost Regressor│
+│  Recharts        │     │  Pydantic Models │     │  Scikit-learn     │
+│  TanStack Router │     │                  │     │  Joblib           │
+└──────────────────┘     └──────────────────┘     └──────────────────┘
+```
+
+### Architecture Components:
+
+| Layer | Component | Description |
+|-------|-----------|-------------|
+| **Presentation** | React Components | Dashboard, Forecast, Settings pages with responsive UI |
+| **Routing** | TanStack Router | File-based routing with nested layouts |
+| **State Mgmt** | TanStack Query | Server state management for API calls |
+| **Styling** | Tailwind CSS | OKLCH color system with custom design tokens |
+| **API Layer** | FastAPI | RESTful endpoints for forecast predictions |
+| **ML Layer** | XGBoost + Bi-LSTM | 2-layer ensemble model for yield forecasting |
+| **Data Sources** | Satellite Data | Sentinel-1 SAR, MODIS vegetation indices |
+
+---
+
 ## Overview
 
 TANAW is a dashboard application that provides:
@@ -69,38 +104,58 @@ npm run preview
 ## Project Structure
 
 ```
-src/
-├── routes/           # Application routes (TanStack Router)
-│   ├── __root.tsx    # Root layout
-│   ├── index.tsx     # Dashboard (home page)
-│   ├── forecast.tsx  # Forecast page
-│   ├── settings.tsx  # Settings page
-│   ├── users.tsx     # Users page
-│   └── api/
-│       └── forecast.ts      # API proxy to Python backend
-├── components/       # Reusable UI components
-│   ├── app-shell.tsx # Main application shell
-│   └── ui/          # Radix UI-based components
-├── hooks/           # Custom React hooks
-├── lib/             # Utilities and helpers
-│   ├── forecast-service.ts  # Forecast calculation (XGBoost/BiLSTM integration)
-│   └── forecast-service.test.ts
-├── router.tsx       # Router configuration
-├── server.ts        # SSR server entry
-└── start.tsx        # Client entry point
-```
-
-```
-api/
-└── forecast_api.py  # FastAPI backend for ML predictions
-```
-
-```
-XGBoost Model/
-├── layer1_xgboost.json  # XGBoost feature extractor
-├── layer2_bilstm.keras  # Bi-LSTM yield predictor
-├── feature_scaler.pkl   # Feature normalization scaler
-└── target_scaler.pkl    # Target inverse scaling
+tanaw/
+├── src/
+│   ├── routes/           # Application routes (TanStack Router)
+│   │   ├── __root.tsx    # Root layout
+│   │   ├── index.tsx     # Dashboard (home page)
+│   │   ├── forecast.tsx  # Forecast page
+│   │   ├── settings.tsx  # Settings page
+│   │   ├── users.tsx     # Users page
+│   │   ├── _index.test.tsx       # Dashboard tests
+│   │   ├── forecast.test.tsx     # Forecast tests
+│   │   ├── settings.test.tsx     # Settings tests
+│   │   └── mobile.test.tsx       # Mobile viewport tests
+│   │   └── api/
+│   │       └── forecast.ts       # API proxy to Python backend
+│   ├── components/       # Reusable UI components
+│   │   ├── app-shell.tsx # Main application shell
+│   │   └── ui/          # Radix UI-based components
+│   ├── hooks/            # Custom React hooks
+│   │   └── use-mobile.tsx # Mobile detection hook
+│   ├── lib/              # Utilities and helpers
+│   │   ├── forecast-service.ts   # Forecast calculation
+│   │   ├── forecast-service.test.ts
+│   │   ├── utils.ts      # Class name utility
+│   │   ├── utils.test.ts
+│   │   └── error-*.ts    # Error handling
+│   ├── accessibility/    # Accessibility tests
+│   │   └── accessibility.test.ts
+│   ├── styles/           # Styling tests
+│   │   └── typography.test.ts
+│   ├── test/             # Test configuration
+│   │   ├── setup.ts      # Test setup and mocks
+│   │   └── cross-browser.test.ts
+│   ├── router.tsx        # Router configuration
+│   ├── server.ts         # SSR server entry
+│   └── start.tsx         # Client entry point
+├── api/
+│   └── forecast_api.py   # FastAPI backend for ML predictions
+├── XGBoost Model/
+│   ├── layer1_xgboost.json  # XGBoost feature extractor
+│   ├── layer2_bilstm.keras  # Bi-LSTM yield predictor
+│   ├── feature_scaler.pkl   # Feature normalization scaler
+│   └── target_scaler.pkl      # Target inverse scaling
+├── public/              # Static assets
+├── coverage/            # Test coverage reports
+├── scripts/
+│   └── run-tests.sh      # Test automation script
+├── package.json
+├── TEST_PLAN.md          # Test plan documentation
+├── TEST_CASES.md         # Detailed test cases
+├── TEST_RESULTS.md       # Test results summary
+├── XGBOOST_INTEGRATION_GUIDE.md
+└── README.md
 ```
 
 ## Features
@@ -124,9 +179,10 @@ TANAW integrates a 2-layer ensemble ML model for satellite-based rice yield fore
 - **Layer 1**: XGBoost regressor (100 trees) - Feature extraction
 - **Layer 2**: Bi-LSTM neural network (TensorFlow/Keras) - Yield prediction
 - **Input**: 5 dekads × 11 satellite features
-- **Output**: Metric tons yield prediction
+- **Output**: Metric tons yield prediction with MAPE confidence
 
 **Satellite Features:**
+
 | Feature | Source |
 |---------|--------|
 | VH_Mean_dB, VV_Mean_dB | Sentinel-1 SAR backscatter |
@@ -171,44 +227,105 @@ The project uses:
 | `npm run preview` | Preview production build |
 | `npm run lint` | Run ESLint |
 | `npm run format` | Format code with Prettier |
-| `npm run test` | Run tests once |
+| `npm run test` | Run all tests once |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage report |
+| `npm run test:dashboard` | Run dashboard module tests |
+| `npm run test:forecast` | Run forecast module tests |
+| `npm run test:settings` | Run settings module tests |
+| `npm run test:accessibility` | Run accessibility tests |
+| `npm run test:mobile` | Run mobile viewport tests |
+| `npm run test:cross-browser` | Run cross-browser compatibility tests |
+| `npm run test:typography` | Run typography and styling tests |
+| `npm run test:api` | Run backend API tests (Python/pytest) |
 
-## Testing
+## Testing Guide
 
-The project uses [Vitest](https://vitest.dev) for unit testing with React Testing Library.
-
-### Running Tests
+### Quick Start
 
 ```bash
-# Run all tests once
+# Run all tests
 npm run test
 
-# Run tests in watch mode (for development)
-npm run test:watch
-
-# Run tests with coverage report
+# Run with coverage report
 npm run test:coverage
 ```
 
-### Test Structure
+### Module-Specific Testing
+
+```bash
+# Test individual pages
+npm run test:dashboard      # Module 1: Dashboard
+npm run test:forecast       # Module 2: Forecast
+npm run test:settings       # Module 3: Settings
+
+# Test special features
+npm run test:accessibility    # Module 7: Accessibility
+npm run test:mobile         # Module 6: Mobile viewport
+npm run test:cross-browser  # Cross-browser compatibility
+npm run test:typography     # Module 4: Typography & styling
+npm run test:api            # Module 5: Backend API
+```
+
+### Using the Automation Script
+
+```bash
+# Make script executable (Linux/macOS)
+chmod +x scripts/run-tests.sh
+
+# Run all tests with formatted output
+./scripts/run-tests.sh --all
+
+# Run specific test suites
+./scripts/run-tests.sh --accessibility
+./scripts/run-tests.sh --mobile
+./scripts/run-tests.sh --cross-browser
+```
+
+### Test Modules Overview
+
+| Module | Tests | Description |
+|--------|-------|-------------|
+| **Module 1** | Dashboard | Stat cards, charts, fields list, navigation |
+| **Module 2** | Forecast | Region selector, season toggle, area input, results |
+| **Module 3** | Settings | Profile inputs, buttons, notification toggles |
+| **Module 4** | Typography | Fonts, colors (OKLCH), gradients, shadows |
+| **Module 5** | Backend API | FastAPI endpoints, accuracy targets (MAPE < 15%) |
+| **Module 6** | Mobile | Responsive layout, touch targets, viewport testing |
+| **Module 7** | Accessibility | Keyboard nav, focus indicators, screen readers |
+
+### Test Files Location
 
 ```
 src/
 ├── test/
-│   └── setup.ts        # Test setup and mocks
+│   └── setup.ts              # Global test setup with mocks
 ├── lib/
-│   ├── utils.test.ts                    # Utility function tests
-│   ├── forecast-service.test.ts         # Forecast calculation tests
-│   └── forecast-service.ts              # Business logic (extracted for testing)
-├── components/
-│   └── ui/              # UI component tests (to be added)
-└── routes/
-    └── *.test.tsx       # Page component tests (to be added)
+│   ├── utils.test.ts         # Utility function tests
+│   └── forecast-service.test.ts  # Forecast calculation tests
+├── routes/
+│   ├── index.test.tsx        # Dashboard page tests
+│   ├── forecast.test.tsx   # Forecast page tests
+│   ├── settings.test.tsx   # Settings page tests
+│   └── mobile.test.tsx     # Mobile viewport tests
+├── accessibility/
+│   └── accessibility.test.ts # Accessibility tests
+└── styles/
+    └── typography.test.ts  # Typography & styling tests
 ```
 
-See [TEST_PLAN.md](./TEST_PLAN.md) for detailed testing strategy and [TEST_RESULTS.md](./TEST_RESULTS.md) for current test coverage.
+### Writing New Tests
+
+1. Create test file alongside source: `*.test.ts` or `*.test.tsx`
+2. Use Vitest's `describe`/`it`/`expect` API
+3. Mock external dependencies in `setup.ts`
+4. Test files are auto-discovered by vitest config
+
+### Coverage Reports
+
+After running `npm run test:coverage`, reports are generated in:
+- `coverage/index.html` - HTML coverage report (open in browser)
+- Terminal output - Text summary
 
 ## Sample Data
 
@@ -218,3 +335,14 @@ The dashboard includes sample data for:
 - South Terrace (Cagayan) - Dry season
 
 Each field shows area (hectares), growth stage progress, and yield forecasts.
+
+## Documentation
+
+| File | Purpose |
+|------|---------|
+| `TEST_PLAN.md` | Complete testing strategy and approach |
+| `TEST_CASES.md` | Detailed test case catalog with TC codes |
+| `TEST_RESULTS.md` | Current test execution results |
+| `XGBOOST_INTEGRATION_GUIDE.md` | ML model integration documentation |
+
+This project is developed as part of the Tanaw agricultural decision support platform for the Philippine Development Plan 2023-2028.
