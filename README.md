@@ -243,7 +243,36 @@ The project uses:
 | `npm run test:cross-browser` | Run cross-browser compatibility tests |
 | `npm run test:typography` | Run typography and styling tests |
 | `npm run test:api` | Run backend API tests (Python/pytest) |
+| `npm run test:screen:*` | Run tests with delays for screen recording emphasis |
+ 
+## Screen Recording Mode
+ 
+For better visibility during screen recordings, tests can be run with intentional delays between test cases:
+ 
+```bash
+# Run all tests with screen recording delays
+npm run test:screen:all
 
+# Or run specific test suites with delays
+npm run test:screen:dashboard
+npm run test:screen:forecast
+npm run test:screen:accessibility
+npm run test:screen:mobile
+npm run test:screen:cross-browser
+```
+ 
+Using the automation script:
+ 
+```bash
+# Run all tests with emphasis delays
+./scripts/run-tests.sh --all --screen-record
+
+# Run specific suite with delays
+./scripts/run-tests.sh --accessibility --screen-record
+```
+ 
+This adds ~600ms delays after each test case, giving viewers time to see each test result clearly.
+ 
 ## Testing Guide
 
 ### Quick Start

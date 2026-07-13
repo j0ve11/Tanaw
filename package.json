@@ -21,7 +21,16 @@
     "test:cross-browser": "vitest run --reporter=verbose --grep='Cross-Browser'",
     "test:typography": "vitest run --reporter=verbose src/styles/typography.test.ts",
     "test:all": "vitest run --coverage",
-    "test:api": "cd api && python -m pytest test_forecast_api.py -v"
+    "test:api": "cd api && python -m pytest test_forecast_api.py -v",
+    "test:api:screen": "cd api && cross-env SCREEN_RECORD_MODE=true python -m pytest test_forecast_api.py -v --tb=short",
+    "test:screen": "cross-env SCREEN_RECORD_MODE=true vitest run --reporter=verbose",
+    "test:screen:dashboard": "cross-env SCREEN_RECORD_MODE=true vitest run --reporter=verbose src/routes/index.test.tsx",
+    "test:screen:forecast": "cross-env SCREEN_RECORD_MODE=true vitest run --reporter=verbose src/routes/forecast.test.tsx",
+    "test:screen:settings": "cross-env SCREEN_RECORD_MODE=true vitest run --reporter=verbose src/routes/settings.test.tsx",
+    "test:screen:accessibility": "cross-env SCREEN_RECORD_MODE=true vitest run --reporter=verbose --grep='Accessibility'",
+    "test:screen:mobile": "cross-env SCREEN_RECORD_MODE=true vitest run --reporter=verbose --grep='Mobile'",
+    "test:screen:cross-browser": "cross-env SCREEN_RECORD_MODE=true vitest run --reporter=verbose --grep='Cross-Browser'",
+    "test:screen:all": "cross-env SCREEN_RECORD_MODE=true vitest run --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -86,6 +95,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^5.2.0",
     "@vitest/coverage-v8": "^4.1.10",
+    "cross-env": "^10.1.0",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.6",

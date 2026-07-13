@@ -4,11 +4,29 @@ Test cases for FastAPI inference endpoints /api/forecast and /api/health
 """
 
 import pytest
+import time
+import os
 from fastapi.testclient import TestClient
 from forecast_api import app, ForecastInput, DekadFeatures
 
 # Create test client
 client = TestClient(app)
+
+# Check for screen recording mode
+SCREEN_RECORD_MODE = os.environ.get('SCREEN_RECORD_MODE', '').lower() == 'true'
+DELAY_BETWEEN_TESTS = float(os.environ.get('TEST_DELAY_MS', '500')) / 1000.0  # Convert to seconds
+
+# Helper function for screen recording delays
+def screen_record_delay(test_name: str, status: str = "run"):
+    """Add visual emphasis with delay for screen recording"""
+    if SCREEN_RECORD_MODE:
+        time.sleep(DELAY_BETWEEN_TESTS)
+        if status == "pass":
+            print(f"  ✅ PASS: {test_name}")
+        elif status == "fail":
+            print(f"  ❌ FAIL: {test_name}")
+        else:
+            print(f"  ▶️  RUN: {test_name}")
 
 
 class TestHealthEndpoint:

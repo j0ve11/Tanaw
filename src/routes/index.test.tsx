@@ -1,5 +1,19 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { REGION_TOTAL_YIELDS, REGION_AREAS } from "@/lib/forecast-service";
+
+// Screen recording delay helper
+const SCREEN_RECORD_MODE = process.env.SCREEN_RECORD_MODE === 'true';
+const DELAY_BETWEEN_TESTS = 600; // milliseconds - time for screen recording emphasis
+
+// Add delay after each test for screen recording emphasis
+afterEach(() => {
+  if (SCREEN_RECORD_MODE) {
+    const start = performance.now();
+    while (performance.now() - start < DELAY_BETWEEN_TESTS) {
+      // Busy-wait for smooth delay
+    }
+  }
+});
 
 /**
  * Test Module 1: Dashboard Page
