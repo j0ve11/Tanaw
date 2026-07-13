@@ -23,7 +23,7 @@ describe("Accessibility - Keyboard Navigation", () => {
     it("should have focusable elements on Dashboard page", () => {
       // Dashboard should have interactive elements: stat cards link to forecast
       const focusableElements = ["Forecasted yield", "Active fields", "Rainfall (7d)", "Growing degree days"];
-      
+
       focusableElements.forEach((label) => {
         expect(label).toBeDefined();
         expect(label.replace(/\s/g, "").length).toBeGreaterThan(0);
@@ -33,7 +33,7 @@ describe("Accessibility - Keyboard Navigation", () => {
     it("should have focusable elements on Forecast page", () => {
       // Forecast page should have: region selector, season toggles, area input, generate button
       const focusableElements = ["Region", "Season", "Planted area", "Generate forecast"];
-      
+
       focusableElements.forEach((label) => {
         expect(label).toBeDefined();
       });
@@ -42,7 +42,7 @@ describe("Accessibility - Keyboard Navigation", () => {
     it("should have focusable elements on Settings page", () => {
       // Settings page should have: workspace inputs, notification toggles, save/cancel buttons
       const focusableElements = ["Workspace name", "Primary region", "Total hectares", "Contact email"];
-      
+
       focusableElements.forEach((label) => {
         expect(label).toBeDefined();
       });
@@ -110,7 +110,7 @@ describe("Accessibility - Keyboard Navigation", () => {
         { input: "ha", label: "Total hectares" },
         { input: "email", label: "Contact email" },
       ];
-      
+
       inputLabelPairs.forEach(({ input, label }) => {
         expect(input).toBeDefined();
         expect(label).toBeDefined();
@@ -132,7 +132,7 @@ describe("Accessibility - Keyboard Navigation", () => {
       // Foreground should be dark on light background
       const foregroundLight = "oklch(0.22 0.03 150)";
       const backgroundLight = "oklch(0.985 0.012 90)";
-      
+
       // Both should be defined (actual contrast testing would need browser APIs)
       expect(foregroundLight).toBeDefined();
       expect(backgroundLight).toBeDefined();
@@ -142,7 +142,7 @@ describe("Accessibility - Keyboard Navigation", () => {
       // Primary foreground should have good contrast on primary background
       const primaryForeground = "oklch(0.985 0.012 90)";
       const primaryBackground = "oklch(0.45 0.12 150)";
-      
+
       expect(primaryForeground).toBeDefined();
       expect(primaryBackground).toBeDefined();
     });
@@ -162,7 +162,7 @@ describe("Accessibility - Keyboard Navigation", () => {
         number: "number",
         text: "text",
       };
-      
+
       expect(inputTypes.email).toBe("email");
       expect(inputTypes.number).toBe("number");
       expect(inputTypes.text).toBe("text");
@@ -186,7 +186,7 @@ describe("Mobile Accessibility", () => {
       mobile: "text-3xl", // 30px on mobile
       desktop: "md:text-4xl", // 36px on desktop
     };
-    
+
     expect(responsiveSizes.mobile).toBeDefined();
     expect(responsiveSizes.desktop).toBeDefined();
   });

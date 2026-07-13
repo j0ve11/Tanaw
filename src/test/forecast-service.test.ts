@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateForecast, REGION_TOTAL_YIELDS, getRegionNames, getBaseYield, getCalibratedForecast, type Season } from "./forecast-service";
+import { calculateForecast, REGION_TOTAL_YIELDS, getRegionNames, getBaseYield, getCalibratedForecast, type Season } from "@/lib/forecast-service";
 
 describe("forecast-service", () => {
   describe("REGION_TOTAL_YIELDS data", () => {
@@ -110,7 +110,7 @@ describe("forecast-service", () => {
     it("should return accurate MAPE values for both seasons", () => {
       const wetResult = getCalibratedForecast("Nueva Ecija", "wet");
       const dryResult = getCalibratedForecast("Nueva Ecija", "dry");
-      
+
       // MAPE should be under 7% (improved accuracy)
       expect(wetResult.mape).toBeLessThan(7.0);
       expect(dryResult.mape).toBeLessThan(7.0);

@@ -89,7 +89,7 @@ describe("Settings Page", () => {
         { label: "Weather anomaly alerts", defaultChecked: true },
         { label: "Product updates", defaultChecked: false },
       ];
-      
+
       // First two should be true
       expect(defaultToggles[0].defaultChecked).toBe(true);
       expect(defaultToggles[1].defaultChecked).toBe(true);
@@ -102,7 +102,7 @@ describe("Settings Page", () => {
     it("should validate email format", () => {
       const validEmail = "test@example.com";
       const invalidEmail = "invalid-email";
-      
+
       expect(validEmail).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
       expect(invalidEmail).not.toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
     });
@@ -110,7 +110,7 @@ describe("Settings Page", () => {
     it("should validate hectares as positive number", () => {
       const validHa = 132;
       const invalidHa = -50;
-      
+
       expect(validHa).toBeGreaterThan(0);
       expect(invalidHa).toBeLessThan(0);
     });
@@ -118,7 +118,7 @@ describe("Settings Page", () => {
     it("should allow text input for workspace name and region", () => {
       const workspaceName = "Reyes Family Farm";
       const region = "Nueva Ecija, PH";
-      
+
       expect(typeof workspaceName).toBe("string");
       expect(typeof region).toBe("string");
     });
@@ -160,7 +160,7 @@ describe("Settings Page Accessibility", () => {
       "Total hectares",
       "Contact email",
     ];
-    
+
     inputLabels.forEach((label) => {
       expect(label).toBeDefined();
     });
@@ -173,7 +173,7 @@ describe("Settings Page Accessibility", () => {
       "Weather anomaly alerts",
       "Product updates",
     ];
-    
+
     toggleLabels.forEach((label) => {
       expect(label).toBeDefined();
       expect(label.length).toBeGreaterThan(0);

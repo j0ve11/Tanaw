@@ -168,7 +168,7 @@ fi
 if [ "$RUN_ALL" = true ] || [ "$RUN_ACCESSIBILITY" = true ]; then
     echo ""
     echo "=== Accessibility Tests ==="
-    if run_test "Accessibility Tests" "npm run test -- --grep='Accessibility'"; then
+    if run_test "Accessibility Tests" "npm run test:accessibility"; then
         ((PASSED_TESTS++))
     else
         ((FAILED_TESTS++))
@@ -180,7 +180,7 @@ fi
 if [ "$RUN_ALL" = true ] || [ "$RUN_MOBILE" = true ]; then
     echo ""
     echo "=== Mobile Viewport Tests ==="
-    if run_test "Mobile Viewport Tests" "npm run test -- --grep='Mobile'"; then
+    if run_test "Mobile Viewport Tests" "npm run test:mobile"; then
         ((PASSED_TESTS++))
     else
         ((FAILED_TESTS++))
@@ -192,7 +192,7 @@ fi
 if [ "$RUN_ALL" = true ] || [ "$RUN_CROSS_BROWSER" = true ]; then
     echo ""
     echo "=== Cross-Browser Tests ==="
-    if run_test "Cross-Browser Tests" "npm run test -- --grep='Cross-Browser'"; then
+    if run_test "Cross-Browser Tests" "npm run test:cross-browser"; then
         ((PASSED_TESTS++))
     else
         ((FAILED_TESTS++))

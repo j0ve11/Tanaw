@@ -46,7 +46,7 @@ describe("Typography & Styling", () => {
       // Primary should be a blue/green oklch value
       const primaryLight = "oklch(0.45 0.12 150)";
       const primaryDark = "oklch(0.72 0.14 145)";
-      
+
       // OKLCH format: oklch(lightness chromaticity hue) - allow decimal numbers
       const oklchPattern = /^oklch\(\d*\.?\d+\s+\d*\.?\d+\s+\d+\)$/;
       expect(primaryLight).toMatch(oklchPattern);
@@ -57,7 +57,7 @@ describe("Typography & Styling", () => {
       // Success should be a green oklch value
       const successLight = "oklch(0.62 0.14 150)";
       const successDark = "oklch(0.72 0.14 150)";
-      
+
       const oklchPattern = /^oklch\(\d*\.?\d+\s+\d*\.?\d+\s+\d+\)$/;
       expect(successLight).toMatch(oklchPattern);
       expect(successDark).toMatch(oklchPattern);
@@ -66,7 +66,7 @@ describe("Typography & Styling", () => {
     it("should define accent color in OKLCH format", () => {
       // Accent should be a coral/salmon oklch value
       const accentLight = "oklch(0.78 0.14 85)";
-      
+
       const oklchPattern = /^oklch\(\d*\.?\d+\s+\d*\.?\d+\s+\d+\)$/;
       expect(accentLight).toMatch(oklchPattern);
     });
@@ -75,7 +75,7 @@ describe("Typography & Styling", () => {
       // Warning should be an amber oklch value
       const warningLight = "oklch(0.75 0.15 70)";
       const warningDark = "oklch(0.78 0.15 70)";
-      
+
       const oklchPattern = /^oklch\(\d*\.?\d+\s+\d*\.?\d+\s+\d+\)$/;
       expect(warningLight).toMatch(oklchPattern);
       expect(warningDark).toMatch(oklchPattern);
@@ -93,7 +93,7 @@ describe("Typography & Styling", () => {
         "muted",
         "border",
       ];
-      
+
       requiredColors.forEach((color) => {
         expect(color).toBeDefined();
         expect(color.length).toBeGreaterThan(0);

@@ -117,10 +117,6 @@ tanaw/
 │   │   ├── forecast.tsx  # Forecast page
 │   │   ├── settings.tsx  # Settings page
 │   │   ├── users.tsx     # Users page
-│   │   ├── _index.test.tsx       # Dashboard tests
-│   │   ├── forecast.test.tsx     # Forecast tests
-│   │   ├── settings.test.tsx     # Settings tests
-│   │   └── mobile.test.tsx       # Mobile viewport tests
 │   │   └── api/
 │   │       └── forecast.ts       # API proxy to Python backend
 │   ├── components/       # Reusable UI components
@@ -130,22 +126,25 @@ tanaw/
 │   │   └── use-mobile.tsx # Mobile detection hook
 │   ├── lib/              # Utilities and helpers
 │   │   ├── forecast-service.ts   # Forecast calculation
-│   │   ├── forecast-service.test.ts
 │   │   ├── utils.ts      # Class name utility
-│   │   ├── utils.test.ts
 │   │   └── error-*.ts    # Error handling
-│   ├── accessibility/    # Accessibility tests
-│   │   └── accessibility.test.ts
-│   ├── styles/           # Styling tests
-│   │   └── typography.test.ts
-│   ├── test/             # Test configuration
+│   ├── test/             # All test files consolidated here
 │   │   ├── setup.ts      # Test setup and mocks
-│   │   └── cross-browser.test.ts
+│   │   ├── dashboard.test.tsx    # Dashboard tests (Module 1)
+│   │   ├── forecast.test.tsx     # Forecast tests (Module 2)
+│   │   ├── settings.test.tsx     # Settings tests (Module 3)
+│   │   ├── typography.test.ts    # Typography & styling (Module 4)
+│   │   ├── accessibility.test.ts # Accessibility tests (Module 7)
+│   │   ├── mobile.test.tsx       # Mobile viewport tests (Module 6)
+│   │   ├── cross-browser.test.ts # Cross-browser tests
+│   │   ├── utils.test.ts         # Utility function tests
+│   │   └── forecast-service.test.ts # Forecast service tests
 │   ├── router.tsx        # Router configuration
 │   ├── server.ts         # SSR server entry
 │   └── start.tsx         # Client entry point
 ├── api/
-│   └── forecast_api.py   # FastAPI backend for ML predictions
+│   ├── forecast_api.py   # FastAPI backend for ML predictions
+│   └── test_forecast_api.py  # Backend API tests (Module 5)
 ├── XGBoost Model/
 │   ├── layer1_xgboost.json  # XGBoost feature extractor
 │   ├── layer2_bilstm.keras  # Bi-LSTM yield predictor
@@ -329,23 +328,22 @@ chmod +x scripts/run-tests.sh
 | **Module 7** | Accessibility | Keyboard nav, focus indicators, screen readers |
 
 ### Test Files Location
-
+ 
+All test files are now consolidated in a single folder for easy editing:
+ 
 ```
 src/
-├── test/
-│   └── setup.ts              # Global test setup with mocks
-├── lib/
-│   ├── utils.test.ts         # Utility function tests
-│   └── forecast-service.test.ts  # Forecast calculation tests
-├── routes/
-│   ├── index.test.tsx        # Dashboard page tests
-│   ├── forecast.test.tsx   # Forecast page tests
-│   ├── settings.test.tsx   # Settings page tests
-│   └── mobile.test.tsx     # Mobile viewport tests
-├── accessibility/
-│   └── accessibility.test.ts # Accessibility tests
-└── styles/
-    └── typography.test.ts  # Typography & styling tests
+└── test/
+    ├── setup.ts                  # Global test setup with mocks
+    ├── dashboard.test.tsx        # Module 1: Dashboard tests
+    ├── forecast.test.tsx         # Module 2: Forecast tests
+    ├── settings.test.tsx         # Module 3: Settings tests
+    ├── typography.test.ts        # Module 4: Typography & styling tests
+    ├── accessibility.test.ts     # Module 7: Accessibility tests
+    ├── mobile.test.tsx           # Module 6: Mobile viewport tests
+    ├── cross-browser.test.ts     # Cross-browser compatibility tests
+    ├── utils.test.ts             # Utility function tests
+    └── forecast-service.test.ts  # Forecast service tests
 ```
 
 ### Writing New Tests
