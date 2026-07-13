@@ -5,22 +5,27 @@ A modern web application for monitoring and forecasting rice field productivity,
 ## System Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         TANAW Architecture                       │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                           TANAW Architecture                         │
+└─────────────────────────────────────────────────────────────────────┘
 
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│    Frontend      │     │    Backend API   │     │  ML Model Layer  │
-│  (TanStack Start)│◄───►│   (FastAPI)      │◄───►│  (XGBoost/BiLSTM)│
-└──────────────────┘     └──────────────────┘     └──────────────────┘
-        │                         │                         │
-        ▼                         ▼                         ▼
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│  React 19 + TS   │     │  FastAPI v1.0    │     │  TensorFlow/Keras │
-│  Tailwind CSS v4 │     │  Uvicorn Server  │     │  XGBoost Regressor│
-│  Recharts        │     │  Pydantic Models │     │  Scikit-learn     │
-│  TanStack Router │     │                  │     │  Joblib           │
-└──────────────────┘     └──────────────────┘     └──────────────────┘
+┌───────────────────────┐    ┌───────────────────────┐    ┌───────────────────────┐
+│      Frontend         │    │      Backend API      │    │     ML Model Layer    │
+│   (TanStack Start)    │◄──►│      (FastAPI)       │◄──►│    (XGBoost/BiLSTM)   │
+└───────────────────────┘    └───────────────────────┘    └───────────────────────┘
+           │                           │                           │
+           ▼                           ▼                           ▼
+┌───────────────────────┐    ┌───────────────────────┐    ┌───────────────────────┐
+│   Presentation Layer  │    │       API Layer       │    │      ML Pipeline      │
+│                       │    │                       │    │                       │
+│  ┌────────────────┐  │    │  ┌────────────────┐  │    │  ┌────────────────┐  │
+│  │ React 19 + TS  │  │    │  │ FastAPI v1.0   │  │    │  │ XGBoost Reg.   │  │
+│  │ Tailwind CSS v4│  │    │  │ Uvicorn Server │  │    │  │ Bi-LSTM Neural │  │
+│  │ Recharts       │  │    │  │ Pydantic Models│  │    │  │ Network (TF)   │  │
+│  │ TanStack Router│  │    │  │                │  │    │  │ Scikit-learn   │  │
+│  └────────────────┘  │    │  └────────────────┘  │    │  │ Joblib Scalers │  │
+└───────────────────────┘    └───────────────────────┘    │  └────────────────┘  │
+                                                         └───────────────────────┘
 ```
 
 ### Architecture Components:
