@@ -286,14 +286,14 @@ npm run test:coverage
 ```
 
 ### Module-Specific Testing
-
+ 
 ```bash
 # Test individual pages
 npm run test:dashboard      # Module 1: Dashboard
 npm run test:forecast       # Module 2: Forecast
 npm run test:settings       # Module 3: Settings
-
-# Test special features
+ 
+# Test special features (all tests)
 npm run test:accessibility    # Module 7: Accessibility
 npm run test:mobile         # Module 6: Mobile viewport
 npm run test:cross-browser  # Cross-browser compatibility
