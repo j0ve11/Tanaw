@@ -3,7 +3,10 @@ import { AppShell } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Leaf, TrendingUp, Droplets, CloudSun, Sprout } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, Droplets, CloudSun, Sprout, Download, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 import {
   Area,
   AreaChart,
@@ -56,8 +59,48 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
+  const handleExportDashboard = () => {
+    // Export dashboard data as CSV
+    const reportData = [
+      ["Dashboard Report - Tanaw Workspace"],
+      [""],
+      ["Field Name", "Region", "Season", "Area (ha)", "Yield (MT/ha)", "Status", "Progress"],
+      ...fields.map((f) => [f.name, f.region, f.season, f.area, f.yield, f.status, `${f.progress}%`]),
+    ];
+
+    const csvContent = reportData.map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `tanaw-dashboard-report-${new Date().toISOString().split("T")[0]}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success("Dashboard exported successfully", {
+      description: `${fields.length} fields have been downloaded as CSV.`,
+    });
+  };
+
   return (
-    <AppShell title="Dashboard">
+    <AppShell
+      title="Dashboard"
+      subtitle="Monitor your rice fields and yield forecasts."
+      actions={
+        <>
+          <Button variant="outline" onClick={handleExportDashboard}>
+            <Download className="mr-1.5 h-4 w-4" /> Export
+          </Button>
+          <Button asChild>
+            <Link to="/forecast">
+              <Plus className="mr-1.5 h-4 w-4" /> New forecast
+            </Link>
+          </Button>
+        </>
+      }
+    >
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
           <Card key={s.label}>
