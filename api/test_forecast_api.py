@@ -29,6 +29,26 @@ def screen_record_delay(test_name: str, status: str = "run"):
             print(f"  ▶️  RUN: {test_name}")
 
 
+def get_sample_dekads(season: str = "wet"):
+    """Helper to generate sample dekad data for testing"""
+    seasonal_enc = 1 if season == "wet" else 0
+    return [
+        {
+            "VH_Mean_dB": -15.0,
+            "VV_Mean_dB": -10.0,
+            "VH_VV_Ratio": 0.9,
+            "RVI": 0.03,
+            "NDVI_Mean": 0.5,
+            "EVI_Mean": 0.3,
+            "LSWI_Mean": 0.3,
+            "Seasonal_Encoding": seasonal_enc,
+            "Event_Disruption": 0,
+            "Sin_Dekad": 0.5,
+            "Cos_Dekad": 0.8
+        } for _ in range(5)
+    ]
+
+
 class TestHealthEndpoint:
     """Tests for /api/health endpoint"""
 
@@ -49,25 +69,6 @@ class TestHealthEndpoint:
 class TestForecastEndpoint:
     """Tests for /api/forecast endpoint"""
 
-    def get_sample_dekads(self, season: str = "wet"):
-        """Helper to generate sample dekad data for testing"""
-        seasonal_enc = 1 if season == "wet" else 0
-        return [
-            DekadFeatures(
-                VH_Mean_dB=-15.0,
-                VV_Mean_dB=-10.0,
-                VH_VV_Ratio=0.9,
-                RVI=0.03,
-                NDVI_Mean=0.5,
-                EVI_Mean=0.3,
-                LSWI_Mean=0.3,
-                Seasonal_Encoding=seasonal_enc,
-                Event_Disruption=0,
-                Sin_Dekad=0.5,
-                Cos_Dekad=0.8
-            ) for _ in range(5)
-        ]
-
     def test_forecast_returns_valid_structure(self):
         """Test that forecast returns valid response structure"""
         response = client.post(
@@ -76,7 +77,7 @@ class TestForecastEndpoint:
                 "region": "Nueva Ecija",
                 "season": "wet",
                 "area": 13162,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -95,7 +96,7 @@ class TestForecastEndpoint:
                 "region": "Nueva Ecija",
                 "season": "wet",
                 "area": 13162,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -110,7 +111,7 @@ class TestForecastEndpoint:
                 "region": "Nueva Ecija",
                 "season": "wet",
                 "area": 13162,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -125,7 +126,7 @@ class TestForecastEndpoint:
                 "region": "Nueva Ecija",
                 "season": "wet",
                 "area": 13162,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -140,7 +141,7 @@ class TestForecastEndpoint:
                 "region": "Nueva Ecija",
                 "season": "dry",
                 "area": 13162,
-                "dekads": self.get_sample_dekads("dry")
+                "dekads": get_sample_dekads("dry")
             }
         )
         
@@ -156,7 +157,7 @@ class TestForecastEndpoint:
                 "region": "InvalidRegion",
                 "season": "wet",
                 "area": 13162,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -186,7 +187,7 @@ class TestForecastEndpoint:
                 "region": "Nueva Ecija",
                 "season": "wet",
                 "area": 0,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -203,7 +204,7 @@ class TestForecastEndpoint:
                 "region": "Nueva Ecija",
                 "season": "wet",
                 "area": 13162,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -213,7 +214,7 @@ class TestForecastEndpoint:
                 "region": "Iloilo",
                 "season": "wet",
                 "area": 12474,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -232,7 +233,7 @@ class TestForecastEndpoint:
                 "region": "Nueva Ecija",
                 "season": "wet",
                 "area": 13162,
-                "dekads": self.get_sample_dekads()
+                "dekads": get_sample_dekads()
             }
         )
         
@@ -249,25 +250,28 @@ class TestForecastAccuracy:
     def test_mape_meets_target_all_seasons(self):
         """Test MAPE meets < 15% target for all seasons"""
         for season in ["wet", "dry"]:
+            seasonal_enc = 1 if season == "wet" else 0
             response = client.post(
                 "/api/forecast",
                 json={
                     "region": "Nueva Ecija",
                     "season": season,
                     "area": 13162,
-                    "dekads": [DekadFeatures(
-                        VH_Mean_dB=-15.0,
-                        VV_Mean_dB=-10.0,
-                        VH_VV_Ratio=0.9,
-                        RVI=0.03,
-                        NDVI_Mean=0.5,
-                        EVI_Mean=0.3,
-                        LSWI_Mean=0.3,
-                        Seasonal_Encoding=1 if season == "wet" else 0,
-                        Event_Disruption=0,
-                        Sin_Dekad=0.5,
-                        Cos_Dekad=0.8
-                    ) for _ in range(5)]
+                    "dekads": [
+                        {
+                            "VH_Mean_dB": -15.0,
+                            "VV_Mean_dB": -10.0,
+                            "VH_VV_Ratio": 0.9,
+                            "RVI": 0.03,
+                            "NDVI_Mean": 0.5,
+                            "EVI_Mean": 0.3,
+                            "LSWI_Mean": 0.3,
+                            "Seasonal_Encoding": seasonal_enc,
+                            "Event_Disruption": 0,
+                            "Sin_Dekad": 0.5,
+                            "Cos_Dekad": 0.8
+                        } for _ in range(5)
+                    ]
                 }
             )
             
@@ -283,19 +287,21 @@ class TestForecastAccuracy:
                 "region": "Nueva Ecija",
                 "season": "wet",
                 "area": 13162,
-                "dekads": [DekadFeatures(
-                    VH_Mean_dB=-15.0,
-                    VV_Mean_dB=-10.0,
-                    VH_VV_Ratio=0.9,
-                    RVI=0.03,
-                    NDVI_Mean=0.5,
-                    EVI_Mean=0.3,
-                    LSWI_Mean=0.3,
-                    Seasonal_Encoding=1,
-                    Event_Disruption=0,
-                    Sin_Dekad=0.5,
-                    Cos_Dekad=0.8
-                ) for _ in range(5)]
+                "dekads": [
+                    {
+                        "VH_Mean_dB": -15.0,
+                        "VV_Mean_dB": -10.0,
+                        "VH_VV_Ratio": 0.9,
+                        "RVI": 0.03,
+                        "NDVI_Mean": 0.5,
+                        "EVI_Mean": 0.3,
+                        "LSWI_Mean": 0.3,
+                        "Seasonal_Encoding": 1,
+                        "Event_Disruption": 0,
+                        "Sin_Dekad": 0.5,
+                        "Cos_Dekad": 0.8
+                    } for _ in range(5)
+                ]
             }
         )
         

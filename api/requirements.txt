@@ -3,5 +3,10 @@ uvicorn[standard]>=0.29.0
 xgboost>=2.0.0
 numpy>=1.26.0
 scikit-learn>=1.4.0
+# Note: TensorFlow requires Python 3.9-3.12. For Python 3.14, use a virtual env with Python 3.12
 tensorflow>=2.15.0
 python-multipart>=0.0.9
+pytest>=8.0.0
+pytest-testdox>=3.0.0
+requests>=2.31.0
+httpx>=0.28.0
