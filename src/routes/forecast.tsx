@@ -54,19 +54,25 @@ const history = [
 function ForecastPage() {
   const [region, setRegion] = useState<string>("Nueva Ecija");
   const [season, setSeason] = useState<"wet" | "dry">("wet");
-  const [area, setArea] = useState<number>(0);
+  const [area, setArea] = useState<string>("");
   const [result, setResult] = useState<null | { perHa: number; total: number; mape: number; source?: string }>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get default area for selected region (Metric Tons total yield)
-  const defaultArea = REGION_AREAS[region] ?? 13000;
-  const areaForCalculation = area > 0 ? area : defaultArea;
+  // Parse area string to number (undefined if empty/invalid)
+  const areaNum = area ? Number(area) : undefined;
+
+  // Reset planted area when region changes (user must re-enter)
+  const handleRegionChange = (newRegion: string) => {
+    setRegion(newRegion);
+    setArea("");
+    setResult(null);
+  };
 
   const compute = async () => {
     setIsLoading(true);
     try {
-      // Use user-specified area if provided, otherwise use default region area
-      const prediction = await calculateForecast(region, season, areaForCalculation);
+      // Use user-specified area if provided, otherwise use region default
+      const prediction = await calculateForecast(region, season, areaNum);
       setResult(prediction);
       // Show warning toast if using fallback/estimated data
       if (prediction.source === "fallback") {
@@ -85,8 +91,11 @@ function ForecastPage() {
     }
   };
 
-  // Get area for display: use user input if provided, otherwise region default
-  const areaForDisplay = area > 0 ? area : (result ? REGION_AREAS[region] ?? 13000 : REGION_AREAS[region] ?? 13000);
+  // Get the effective area for display: user-entered value, or region default
+  const defaultArea = REGION_AREAS[region] ?? 13000;
+  // Show empty input initially (when area is "" and no result yet)
+  // Show region default area in display only after a forecast has been generated
+  const areaInputValue = area === "" && !result ? "" : (area || String(defaultArea));
 
   return (
     <AppShell
@@ -102,7 +111,7 @@ function ForecastPage() {
           <CardContent className="space-y-5">
             <div className="space-y-2">
               <Label>Region</Label>
-              <Select value={region} onValueChange={setRegion}>
+              <Select value={region} onValueChange={handleRegionChange}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {getRegionNames().map((r) => (
@@ -137,8 +146,9 @@ function ForecastPage() {
               <Input
                 id="area"
                 type="number"
-                value={areaForDisplay}
-                onChange={(e) => setArea(Number(e.target.value) || 0)}
+                value={areaInputValue}
+                onChange={(e) => setArea(e.target.value)}
+                placeholder="Enter planted area (ha)"
                 min={1}
               />
             </div>
@@ -163,7 +173,7 @@ function ForecastPage() {
                   </p>
                   <p className="mt-2 text-sm opacity-90">
                     {result ? (
-                      <>Total: <span className="font-semibold">{result.total.toLocaleString()} MT</span> across {areaForDisplay.toLocaleString()} ha</>
+                      <>Total: <span className="font-semibold">{result.total.toLocaleString()} MT</span> across {(area || String(defaultArea)).toLocaleString()} ha</>
                     ) : (
                       <>Select region and season, then generate a forecast.</>
                     )}
@@ -178,7 +188,7 @@ function ForecastPage() {
             <CardContent className="grid gap-4 p-6 sm:grid-cols-3">
               <Stat label="Region" value={region} />
               <Stat label="Season" value={season === "wet" ? "Wet" : "Dry"} />
-              <Stat label="Area" value={`${areaForDisplay.toLocaleString()} ha`} />
+              <Stat label="Area" value={`${(area || String(defaultArea)).toLocaleString()} ha`} />
             </CardContent>
           </Card>
 

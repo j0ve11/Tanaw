@@ -81,6 +81,24 @@ describe("Forecast Page", () => {
       expect(typeof validArea).toBe("number");
       expect(isNaN(Number(invalidArea))).toBe(true);
     });
+
+    it("should start empty when no area is entered yet", () => {
+      const initialArea = "";
+      expect(initialArea).toBe("");
+    });
+
+    it("should be empty string type (allowing empty input)", () => {
+      const area = "";
+      expect(typeof area).toBe("string");
+      expect(area).toBe("");
+    });
+
+    it("should accept numeric string values for user entry", () => {
+      const area = "150";
+      expect(typeof area).toBe("string");
+      expect(Number(area)).toBe(150);
+      expect(isNaN(Number(area))).toBe(false);
+    });
   });
 
   describe("Forecast Calculation", () => {

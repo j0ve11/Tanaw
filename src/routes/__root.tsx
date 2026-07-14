@@ -74,10 +74,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Tanaw — Rice Yield Forecasting for Modern Farms" },
+      { title: "Tanaw" },
       { name: "description", content: "Forecast rice yields, track fields, and plan seasons with a data-driven dashboard built for growers and agronomists." },
       { name: "author", content: "Tanaw" },
-      { property: "og:title", content: "Tanaw — Rice Yield Forecasting" },
+      { property: "og:title", content: "Tanaw" },
       { property: "og:description", content: "Forecast rice yields and plan seasons with confidence." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
